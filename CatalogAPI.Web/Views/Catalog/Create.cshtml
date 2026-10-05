@@ -1,0 +1,54 @@
+@model CatalogAPI.Web.Models.CreateCatalogItemViewModel
+
+@{
+    ViewData["Title"] = "Yeni Ürün Ekle";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-5">
+                    <h3 class="fw-bold mb-4 text-center">Yeni Ürün Ekle</h3>
+
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <!-- Kategori otomatik olarak Elektronik atanıyor -->
+                        <input type="hidden" asp-for="CategoryId" />
+
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label fw-semibold">Ürün Adı</label>
+                            <input asp-for="Name" class="form-control form-control-lg rounded-3" placeholder="Örn: Kablosuz Mouse" required />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label fw-semibold">Açıklama</label>
+                            <textarea asp-for="Description" class="form-control rounded-3" rows="3" placeholder="Ürün özelliklerini girin"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label asp-for="Price" class="form-label fw-semibold">Fiyat (TL)</label>
+                                <input asp-for="Price" type="number" step="0.01" class="form-control form-control-lg rounded-3" required />
+                                <span asp-validation-for="Price" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="StockQuantity" class="form-label fw-semibold">Stok Adedi</label>
+                                <input asp-for="StockQuantity" type="number" class="form-control form-control-lg rounded-3" required />
+                                <span asp-validation-for="StockQuantity" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <a asp-action="Index" class="btn btn-light btn-lg w-50 rounded-pill">İptal</a>
+                            <button type="submit" class="btn btn-primary btn-lg w-50 rounded-pill shadow-sm">Kaydet</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

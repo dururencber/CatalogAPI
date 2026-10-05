@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="CatalogAPI.API/CatalogAPI.API.csproj" />
+  <Project Path="CatalogAPI.Application/CatalogAPI.Application.csproj" />
+  <Project Path="CatalogAPI.Domain/CatalogAPI.Domain.csproj" />
+  <Project Path="CatalogAPI.Infrastructure/CatalogAPI.Infrastructure.csproj" />
+  <Project Path="CatalogAPI.Web/CatalogAPI.Web.csproj" />
+</Solution>
