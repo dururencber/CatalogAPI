@@ -53,6 +53,23 @@ public class ProductsController : ControllerBase
         }
     }
 
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateProductDto dto)
+    {
+        try
+        {
+            var result = await _productService.UpdateProductAsync(id, dto);
+            if (!result)
+                return NotFound("Güncellenecek ürün bulunamadı.");
+
+            return NoContent();
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {

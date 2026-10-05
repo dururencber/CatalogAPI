@@ -10,10 +10,7 @@ public class ProductService : IProductService
     private readonly IProductRepository _productRepository;
     private readonly ICategoryRepository _categoryRepository;
 
-    // Hem Product hem Category repository'lerini alıyoruz çünkü ürün eklerken kategori var mı diye bakacağız!
-    public ProductService(
-        IProductRepository productRepository,
-        ICategoryRepository categoryRepository)
+    public ProductService(IProductRepository productRepository, ICategoryRepository categoryRepository)
     {
         _productRepository = productRepository;
         _categoryRepository = categoryRepository;
@@ -22,14 +19,14 @@ public class ProductService : IProductService
     public async Task<IReadOnlyList<ProductDto>> GetAllProductsAsync()
     {
         var products = await _productRepository.GetAllAsync();
-
         return products.Select(p => new ProductDto
         {
             Id = p.Id,
             Name = p.Name,
+            Description = p.Description,
             Price = p.Price,
-            CategoryId = p.CategoryId,
-            CategoryName = p.Category != null ? p.Category.Name : string.Empty
+            StockQuantity = p.StockQuantity,
+            CategoryId = p.CategoryId
         }).ToList();
     }
 
@@ -42,54 +39,74 @@ public class ProductService : IProductService
         {
             Id = product.Id,
             Name = product.Name,
+            Description = product.Description,
             Price = product.Price,
-            CategoryId = product.CategoryId,
-            CategoryName = product.Category != null ? product.Category.Name : string.Empty
+            StockQuantity = product.StockQuantity,
+            CategoryId = product.CategoryId
         };
     }
 
     public async Task<IReadOnlyList<ProductDto>> GetProductsByCategoryIdAsync(Guid categoryId)
     {
         var products = await _productRepository.GetByCategoryIdAsync(categoryId);
-
         return products.Select(p => new ProductDto
         {
             Id = p.Id,
             Name = p.Name,
+            Description = p.Description,
             Price = p.Price,
-            CategoryId = p.CategoryId,
-            CategoryName = p.Category != null ? p.Category.Name : string.Empty
+            StockQuantity = p.StockQuantity,
+            CategoryId = p.CategoryId
         }).ToList();
     }
 
     public async Task<ProductDto> CreateProductAsync(CreateProductDto dto)
     {
-        // İş Kuralı: Ürün eklenmek istenen kategori gerçekten veritabanında var mı?
         var category = await _categoryRepository.GetByIdAsync(dto.CategoryId);
         if (category == null)
-        {
-            throw new ArgumentException("Belirtilen kategori bulunamadı!");
-        }
+            throw new ArgumentException("Belirtilen kategori bulunamadı.");
 
         var product = new Product
         {
             Id = Guid.NewGuid(),
             Name = dto.Name,
+            Description = dto.Description,
             Price = dto.Price,
-            CategoryId = dto.CategoryId
+            StockQuantity = dto.StockQuantity,
+            CategoryId = dto.CategoryId,
+            CreatedAt = DateTime.UtcNow
         };
 
-        await _productRepository.AddAsync(product);
-        await _productRepository.SaveChangesAsync();
+        var created = await _productRepository.AddAsync(product);
 
         return new ProductDto
         {
-            Id = product.Id,
-            Name = product.Name,
-            Price = product.Price,
-            CategoryId = product.CategoryId,
-            CategoryName = category.Name
+            Id = created.Id,
+            Name = created.Name,
+            Description = created.Description,
+            Price = created.Price,
+            StockQuantity = created.StockQuantity,
+            CategoryId = created.CategoryId
         };
+    }
+
+    public async Task<bool> UpdateProductAsync(Guid id, UpdateProductDto dto)
+    {
+        var product = await _productRepository.GetByIdAsync(id);
+        if (product == null) return false;
+
+        var category = await _categoryRepository.GetByIdAsync(dto.CategoryId);
+        if (category == null)
+            throw new ArgumentException("Belirtilen kategori bulunamadı.");
+
+        product.Name = dto.Name;
+        product.Description = dto.Description;
+        product.Price = dto.Price;
+        product.StockQuantity = dto.StockQuantity;
+        product.CategoryId = dto.CategoryId;
+
+        await _productRepository.UpdateAsync(product);
+        return true;
     }
 
     public async Task<bool> DeleteProductAsync(Guid id)
@@ -97,7 +114,7 @@ public class ProductService : IProductService
         var product = await _productRepository.GetByIdAsync(id);
         if (product == null) return false;
 
-        _productRepository.Delete(product);
-        return await _productRepository.SaveChangesAsync();
+        await _productRepository.DeleteAsync(product);
+        return true;
     }
 }

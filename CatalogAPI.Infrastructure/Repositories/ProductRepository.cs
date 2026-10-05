@@ -16,45 +16,35 @@ public class ProductRepository : IProductRepository
 
     public async Task<IReadOnlyList<Product>> GetAllAsync()
     {
-        return await _context.Products
-            .Include(p => p.Category)
-            .AsNoTracking()
-            .ToListAsync();
+        return await _context.Products.Include(p => p.Category).ToListAsync();
     }
 
     public async Task<Product?> GetByIdAsync(Guid id)
     {
-        return await _context.Products
-            .Include(p => p.Category)
-            .FirstOrDefaultAsync(p => p.Id == id);
+        return await _context.Products.Include(p => p.Category).FirstOrDefaultAsync(p => p.Id == id);
     }
 
     public async Task<IReadOnlyList<Product>> GetByCategoryIdAsync(Guid categoryId)
     {
-        return await _context.Products
-            .Where(p => p.CategoryId == categoryId)
-            .Include(p => p.Category)
-            .AsNoTracking()
-            .ToListAsync();
+        return await _context.Products.Where(p => p.CategoryId == categoryId).ToListAsync();
     }
 
-    public async Task AddAsync(Product product)
+    public async Task<Product> AddAsync(Product product)
     {
         await _context.Products.AddAsync(product);
+        await _context.SaveChangesAsync();
+        return product;
     }
 
-    public void Update(Product product)
+    public async Task UpdateAsync(Product product)
     {
         _context.Products.Update(product);
+        await _context.SaveChangesAsync();
     }
 
-    public void Delete(Product product)
+    public async Task DeleteAsync(Product product)
     {
         _context.Products.Remove(product);
-    }
-
-    public async Task<bool> SaveChangesAsync()
-    {
-        return await _context.SaveChangesAsync() > 0;
+        await _context.SaveChangesAsync();
     }
 }

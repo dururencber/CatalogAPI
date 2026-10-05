@@ -29,6 +29,12 @@ public class CatalogService : ICatalogService
         return response.IsSuccessStatusCode;
     }
 
+    public async Task<bool> UpdateAsync(Guid id, CatalogItemViewModel model)
+    {
+        var response = await _httpClient.PutAsJsonAsync($"api/Products/{id}", model);
+        return response.IsSuccessStatusCode;
+    }
+
     public async Task<bool> DeleteAsync(Guid id)
     {
         var response = await _httpClient.DeleteAsync($"api/Products/{id}");
