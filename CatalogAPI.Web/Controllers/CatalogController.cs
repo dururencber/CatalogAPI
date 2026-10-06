@@ -7,6 +7,8 @@ namespace CatalogAPI.Web.Controllers;
 public class CatalogController : Controller
 {
     private readonly ICatalogService _catalogService;
+    // Veritabanındaki 'Elektronik' kategorisinin ID'si
+    private static readonly Guid DefaultCategoryId = Guid.Parse("db59aabf-04b3-450d-b5e5-b6bce320d0a3");
 
     public CatalogController(ICatalogService catalogService)
     {
@@ -21,13 +23,23 @@ public class CatalogController : Controller
 
     public IActionResult Create()
     {
-        return View();
+        // CategoryId'si dolu bir model gönderiyoruz
+        var model = new CreateCatalogItemViewModel
+        {
+            CategoryId = DefaultCategoryId
+        };
+        return View(model);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(CreateCatalogItemViewModel model)
     {
+        if (model.CategoryId == Guid.Empty)
+        {
+            model.CategoryId = DefaultCategoryId;
+        }
+
         if (!ModelState.IsValid)
             return View(model);
 
