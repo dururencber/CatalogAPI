@@ -1,9 +1,10 @@
 using CatalogAPI.Domain.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace CatalogAPI.Infrastructure.Persistence;
 
-public class CatalogDbContext : DbContext
+public class CatalogDbContext : IdentityDbContext
 {
     // 1. Constructor (Yapıcı Metot)
     public CatalogDbContext(DbContextOptions<CatalogDbContext> options) : base(options)

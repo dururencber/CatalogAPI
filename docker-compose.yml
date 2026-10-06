@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: catalog_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: CatalogDb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  catalog-api:
+    build:
+      context: .
+      dockerfile: CatalogAPI.API/Dockerfile
+    container_name: catalog_api
+    restart: always
+    depends_on:
+      - db
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=CatalogDb;Username=postgres;Password=postgres
+      - JwtSettings__Issuer=CatalogAPI
+      - JwtSettings__Audience=CatalogAppUsers
+      - JwtSettings__SecretKey=BuCokGizliVeGucluBirAnahtardirEnAz32KarakterOlmali!
+      - JwtSettings__ExpirationInMinutes=60
+    ports:
+      - "5054:8080"
+
+  catalog-web:
+    build:
+      context: .
+      dockerfile: CatalogAPI.Web/Dockerfile
+    container_name: catalog_web
+    restart: always
+    depends_on:
+      - catalog-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ApiSettings__BaseUrl=http://catalog-api:8080/
+    ports:
+      - "5001:8080"
+
+volumes:
+  postgres_data:
