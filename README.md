@@ -1,137 +1,108 @@
 📦 CatalogAPI
 
-Modern RESTful mimari standartlarına uygun, JWT ile yetkilendirilmiş, Entity Framework Core ile veri yönetimi sağlayan ve Docker ortamına hazır bir Ürün Kataloğu API servisidir.
+A scalable, containerized, and production-ready RESTful Web API built with ASP.NET Core 8, designed following modern Clean Architecture principles and Domain-Driven Design (DDD) fundamentals.
 
-🎯 Projenin Amacı ve Özellikleri
+🎯 Project Overview
 
-Bu proje, kurumsal backend geliştirme pratiklerini ve bulut odaklı konteynerizasyon süreçlerini uygulamak amacıyla tasarlanmıştır:
+CatalogAPI serves as a core catalog management service for distributed e-commerce and inventory workflows. It showcases production-grade backend design patterns: decoupled layer structure, database abstraction using Entity Framework Core, stateless security with JWT authentication, secret management, and full containerization via Docker.
 
-RESTful Standartları: Kaynak odaklı URL yapısı, doğru HTTP metotları (GET, POST, PUT, DELETE) ve durum kodları (200, 201, 400, 401, 404).
+✨ Key Architectural Highlights
 
-Katmanlı / Güvenli Veri Akışı: Entity modellerinin dış dünyaya kapatılarak DTO (Data Transfer Object) deseni ile veri taşınması.
+Layered Architecture: Clear separation of concerns spanning API, Application, Domain, and Infrastructure.
 
-Durumsuz (Stateless) Kimlik Doğrulama: JSON Web Token (JWT) tabanlı authentication ve rol bazlı authorization ([Authorize]).
+Stateless Security (JWT): Token-based authentication and role-based authorization ([Authorize(Roles = "...")]) to isolate sensitive administrative endpoints.
 
-Veritabanı Yönetimi: PostgreSQL üzerinde Code-First yaklaşımı ve Entity Framework Core migration mekanizması.
+DTO & Data Isolation: Request and response schemas abstracted via Data Transfer Objects (DTOs) to prevent sensitive entity leakage.
 
-Konteyner Desteği: Multi-stage Dockerfile ile platformdan bağımsız derleme ve dağıtım hazırlığı.
+Code-First ORM: Relational schema migrations, indexing, and seeds managed through Entity Framework Core and PostgreSQL.
 
-Etkileşimli Dokümantasyon: JWT Bearer entegrasyonuna sahip Swagger UI.
+Credential Isolation: Local secrets secured via .NET Secret Manager (dotnet user-secrets); container environments configured using decoupled environment variables.
 
-🏗️ Mimari & Teknoloji Yığını
+Dockerized Workflows: Automated build and runtime packaging with multi-stage Dockerfile and docker-compose.yml declarations.
 
-Çalışma Ortamı: C# / .NET 8 Web API
-
-Veritabanı & ORM: PostgreSQL / Entity Framework Core (Npgsql)
-
-Kimlik Doğrulama: Microsoft.AspNetCore.Authentication.JwtBearer
-
-Dokümantasyon: Swashbuckle / Swagger OpenAPI
-
-Konteyner: Docker
-
-📁 Dizin Yapısı
+🏗️ Architecture & Layer Structure
 
 CatalogAPI/
-├── Controllers/         # API Endpoint tanımlamaları ve istek karşılama
-├── Models/              # Veritabanı tablolarına karşılık gelen Entity sınıfları
-│   ├── Entities/        # Temel veritabanı modelleri (Product, User vb.)
-│   └── DTOs/            # Dış dünyaya sunulan veri aktarım nesneleri
-├── Data/                # DbContext ve veritabanı konfigürasyonları
-│   └── AppDbContext.cs
-├── Services/            # İş mantığı ve token üretim servisleri
-├── Migrations/          # EF Core veritabanı göç geçmişi
-├── Dockerfile           # Konteyner derleme adımları
-├── appsettings.json     # Genel uygulama yapılandırma şablonu
-└── Program.cs           # Dependency Injection ve Middleware hattı
+├── src/
+│   ├── CatalogAPI.API/            # Controllers, middleware, dependency injection & Swagger setup
+│   ├── CatalogAPI.Application/    # DTOs, CQRS/Service contracts, validation rules & business logic
+│   ├── CatalogAPI.Domain/         # Domain entities, enums & repository contracts
+│   └── CatalogAPI.Infrastructure/ # EF Core DbContext, PostgreSQL mappings & third-party integrations
+├── docker-compose.yml             # Orchestration for API & PostgreSQL database
+├── Dockerfile                     # Multi-stage production container build
+└── README.md                      # Project documentation
 
 
-💻 Yerel Geliştirme Ortamı Kurulumu
+🛠️ Tech Stack & Dependencies
 
-Projeyi yerel makinenizde çalıştırmak için aşağıdaki adımları izleyin:
+Platform / Framework: C# / .NET 8 Web API
 
-Gereksinimler
+Database & ORM: PostgreSQL, Entity Framework Core 8
+
+Authentication: JSON Web Tokens (Bearer Authentication)
+
+API Documentation: Swagger / OpenAPI UI
+
+Containerization: Docker & Docker Compose
+
+Package Management: NuGet
+
+🚀 Local Development & Setup
+
+Prerequisites
 
 .NET 8 SDK
 
-Docker Desktop (veya yerel PostgreSQL sunucusu)
+Docker Desktop
 
 Git
 
-1. Repoyu Klonlayın
+Step 1: Clone the Repository
 
-git clone https://github.com/<kullanici-adiniz>/CatalogAPI.git
+git clone https://github.com/dururencber/CatalogAPI.git
 cd CatalogAPI
 
 
-2. Yerel Veritabanını Başlatın (Docker)
+Step 2: Spin Up Infrastructure (PostgreSQL)
 
-PostgreSQL instance'ını arka planda ayağa kaldırmak için:
+You can launch the PostgreSQL container using Docker Compose:
 
-docker run --name catalog-postgres \
-  -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=postgres \
-  -e POSTGRES_DB=CatalogDb \
-  -p 5432:5432 \
-  -d postgres:16-alpine
+docker compose up -d
 
 
-3. Gizli Bilgileri Tanımlayın (.NET User Secrets)
+Step 3: Configure Local Secrets
 
-Hassas verileri (şifre ve JWT secret key) kodun içerisine yazmadan yerel geliştirme kasanıza ekleyin:
+To prevent credential leakage in version control, inject your connection string via the .NET Secret Manager:
 
+cd CatalogAPI.API
 dotnet user-secrets init
-
-# Veritabanı bağlantı dizesi
-dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Port=5432;Database=CatalogDb;Username=postgres;Password=postgres"
-
-# JWT konfigürasyonu
-dotnet user-secrets set "JwtSettings:Secret" "BuKisimEnAz32KarakterliCokGizliBirKeyOlmali123!"
-dotnet user-secrets set "JwtSettings:Issuer" "CatalogAPI"
-dotnet user-secrets set "JwtSettings:Audience" "CatalogAPIUsers"
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Port=5432;Database=CatalogDb;Username=postgres;Password=your_secure_password"
 
 
-4. Veritabanı Migration İşlemini Uygulayın
+Step 4: Apply Database Migrations
 
-Veritabanı şemasını PostgreSQL üzerinde oluşturmak için:
+Run database migrations to initialize tables and relationships:
 
-dotnet ef database update
+dotnet ef database update --project ../CatalogAPI.Infrastructure
 
 
-(Eğer dotnet ef komutu yüklü değilse: dotnet tool install --global dotnet-ef)
-
-5. Uygulamayı Çalıştırın
+Step 5: Run the API
 
 dotnet run
 
 
-Uygulama çalıştıktan sonra API testlerini gerçekleştirmek için tarayıcınızdan Swagger arayüzüne gidin:
-👉 https://localhost:5001/swagger veya http://localhost:5000/swagger
+Once running, access the interactive Swagger interface at:
 
-🔑 API Kimlik Doğrulama Akışı
+Swagger UI: https://localhost:5001/swagger or http://localhost:5000/swagger
 
-/api/auth/register veya /api/auth/login endpoint'ine geçerli bilgileri göndererek JWT Token elde edin.
+🔒 Security & Best Practices
 
-Swagger ekranının sağ üst köşesindeki Authorize butonuna tıklayın.
+Zero Credential Exposure: Database strings and cryptographic keys are strictly excluded from git tracking.
 
-Açılan kutucuğa format şu şekilde olacak şekilde token'ı girin:
+Stateless Scalability: JWT-based request signing ensures the service can be horizontally scaled behind an API Gateway or AWS ALB without session stickiness.
 
-Bearer <sizin_token_degeriniz>
+Data Protection: Client inputs are strictly validated before hitting the domain layer.
 
+📄 License
 
-Artık kilitli ([Authorize]) endpoint'lere (POST, PUT, DELETE /api/products) istek atabilirsiniz.
-
-🐳 Docker ile Çalıştırma
-
-Projeyi bağımsız bir imaj olarak paketleyip çalıştırmak için:
-
-# İmajı derleyin
-docker build -t catalog-api .
-
-# Konteyneri başlatın
-docker run -d -p 8080:8080 --name catalog-app catalog-api
-
-
-📄 Lisans
-
-Bu proje eğitim ve portfolyo amacıyla hazırlanmıştır. Açık kaynak olarak geliştirilebilir.
+This project is licensed under the MIT License - see the LICENSE file for details.
